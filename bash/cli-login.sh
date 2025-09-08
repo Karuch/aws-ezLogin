@@ -1,11 +1,31 @@
 #!/bin/bash
-
 set -euo pipefail
+
+# ======================================================== #
+# Check if AWS CLI is installed
+# ======================================================== #
+if ! command -v aws &>/dev/null; then
+  echo "❌ AWS CLI not found."
+  read -rp "👉 Do you want to install AWS CLI v2 now? (y/n): " choice
+  case "$choice" in
+    y|Y )
+      echo "⬇️ Downloading and installing AWS CLI..."
+      curl -s "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+      unzip -q awscliv2.zip
+      sudo ./aws/install
+      rm -rf aws awscliv2.zip
+      echo "✅ AWS CLI installed successfully."
+      ;;
+    * )
+      echo "⚠️ AWS CLI is required. Exiting..."
+      exit 1
+      ;;
+  esac
+fi
 
 # ======================================================== #
 # Parse flags
 # ======================================================== #
-
 usage() {
   echo "❌ Missing required arguments."
   echo
@@ -18,7 +38,7 @@ usage() {
   echo
   echo "👉 Example usage (must be sourced, not executed):"
   echo
-  echo "source ./assume-role.sh \\"
+  echo "source ./cli-login.sh \\"
   echo "  --aws-key <AccessKey> \\"
   echo "  --aws-secret <SecretKey> \\"
   echo "  --region <Region e.g il-central-1> \\"
@@ -56,13 +76,11 @@ fi
 # ======================================================== #
 # Prompt MFA code
 # ======================================================== #
-
 read -rp "🔑 Enter MFA code: " MFA_CODE
 
 # ======================================================== #
 # Build ARNs and session info
 # ======================================================== #
-
 MFA_DEVICE_NAME="$PROFILE"
 ROLE_ARN="arn:aws:iam::${ACCOUNT_ID}:role/${ROLE_NAME}"
 MFA_ARN="arn:aws:iam::${ACCOUNT_ID}:mfa/${MFA_DEVICE_NAME}"
@@ -71,7 +89,6 @@ SESSION_NAME="${ROLE_NAME}-$(date +%s)"
 # ======================================================== #
 # Configure base profile
 # ======================================================== #
-
 echo "📂 Creating profile if not exist..."
 aws configure set aws_access_key_id "$AWS_KEY" --profile "$PROFILE-malamteam-infra"
 aws configure set aws_secret_access_key "$AWS_SECRET" --profile "$PROFILE-malamteam-infra"
@@ -81,33 +98,25 @@ aws configure set output json --profile "$PROFILE-malamteam-infra"
 # ======================================================== #
 # Get MFA session token
 # ======================================================== #
-
 echo "🔑 Getting MFA session token..."
 MFA_CREDS=$(aws sts get-session-token \
   --serial-number "$MFA_ARN" \
   --token-code "$MFA_CODE" \
   --profile "$PROFILE-malamteam-infra" \
   --query 'Credentials.[AccessKeyId,SecretAccessKey,SessionToken]' \
-  --output text) || {
-    echo "❌ Failed to get MFA session token. Check your code or profile."
-    exit 1
-}
+  --output text) || { echo "❌ Failed to get MFA session token. Check your code or profile."; exit 1; }
 
 eval $(echo "$MFA_CREDS" | awk '{print "export AWS_ACCESS_KEY_ID="$1"\nexport AWS_SECRET_ACCESS_KEY="$2"\nexport AWS_SESSION_TOKEN="$3}')
 
 # ======================================================== #
 # Assume Role
 # ======================================================== #
-
 echo "🌀 Assuming role: $ROLE_NAME"
 ROLE_CREDS=$(aws sts assume-role \
   --role-arn "$ROLE_ARN" \
   --role-session-name "$SESSION_NAME" \
   --query 'Credentials.[AccessKeyId,SecretAccessKey,SessionToken]' \
-  --output text) || {
-    echo "❌ Failed to assume role $ROLE_NAME"
-    exit 1
-}
+  --output text) || { echo "❌ Failed to assume role $ROLE_NAME"; exit 1; }
 
 eval $(echo "$ROLE_CREDS" | awk '{print "export AWS_ACCESS_KEY_ID="$1"\nexport AWS_SECRET_ACCESS_KEY="$2"\nexport AWS_SESSION_TOKEN="$3}')
 
@@ -116,7 +125,5 @@ echo "✅ Role assumed successfully!"
 # ======================================================== #
 # Show identity
 # ======================================================== #
-
 echo "🔍 Current identity:"
 aws sts get-caller-identity
-
