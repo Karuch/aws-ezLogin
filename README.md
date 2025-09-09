@@ -7,8 +7,8 @@ and all of those are automated to a single command!
 
 ## Getting Started
 
-[Download linux bash compatible script](https://raw.githubusercontent.com/Karuch/aws-cli-setup-sophistication//main/linux/bash/cli-login.sh)  
-[Download windows powershell compatible script](https://raw.githubusercontent.com/Karuch/aws-cli-setup-sophistication//main/windows/powershell/cli-login.ps1)
+[Download linux bash compatible script](https://github.com/Karuch/aws-cli-setup-sophistication/blob/main/linux/bash/cli-login.sh)  
+[Download windows powershell compatible script](https://github.com/Karuch/aws-cli-setup-sophistication/blob/main/windows/powershell/cli-login.ps1)
 
  or
 
