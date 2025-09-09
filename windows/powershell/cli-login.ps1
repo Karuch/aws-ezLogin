@@ -22,7 +22,6 @@ function Test-Admin {
 if (-not (Get-Command aws -ErrorAction SilentlyContinue)) {
     Write-Host "❌ AWS CLI not found."
 
-    # Check if user is admin BEFORE trying to install
     if (-not (Test-Admin)) {
         Write-Host "⚠️ You must run this script as Administrator to install AWS CLI."
         exit 1
@@ -55,14 +54,14 @@ function Show-Usage {
     if (-not $roleName)   { Write-Host "   → Missing: -roleName" }
     if (-not $accountId)  { Write-Host "   → Missing: -accountId" }
 
-    Write-Host "`n👉 Example usage:"
-    Write-Host "powershell -ExecutionPolicy Bypass -File cli-login.ps1 `"
-    Write-Host "  -awsKey [AccessKey] `"
-    Write-Host "  -awsSecret [SecretKey] `"
-    Write-Host "  -region il-central-1 `"
-    Write-Host "  -profile talk `"
-    Write-Host "  -roleName [roleName] `"
-    Write-Host "  -accountId 012345678910"
+    Write-Host "`n👉 Example usage:`n"
+    Write-Host 'powershell -ExecutionPolicy Bypass -File .\cli-login.ps1 `'
+    Write-Host '  -awsKey <AccessKey> `'
+    Write-Host '  -awsSecret <SecretKey> `'
+    Write-Host '  -region <Region e.g. il-central-1> `'
+    Write-Host '  -profile <IamUserName e.g. talk> `'
+    Write-Host '  -roleName <roleName> `'
+    Write-Host '  -accountId <accountId e.g. 012345678910>'
     exit 1
 }
 
@@ -147,14 +146,12 @@ try {
 
 $creds = $RoleCreds -split "`t"
 
-# Save creds to the requested profile
 aws configure set aws_access_key_id $creds[0] --profile $profile
 aws configure set aws_secret_access_key $creds[1] --profile $profile
 aws configure set aws_session_token $creds[2] --profile $profile
 aws configure set region $region --profile $profile
 aws configure set output json --profile $profile
 
-# Make this the active profile for the current session
 $env:AWS_PROFILE = $profile
 
 Write-Host "✅ Role assumed successfully!"
@@ -163,6 +160,5 @@ Write-Host "🔍 Current identity:"
 aws sts get-caller-identity
 
 Write-Host ""
-Write-Host "👉 To switch to this profile (`$profile`), run:"
+Write-Host "👉 To switch to this profile (`$profile`) in this session, run:"
 Write-Host "    `$env:AWS_PROFILE = '$profile'"
-
