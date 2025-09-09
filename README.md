@@ -7,8 +7,8 @@ and all of those are automated to a single command!
 
 ## Getting Started
 
- [Download linux bash compatible script](www.google.com)  
- [Download windows powershell compatible script](www.google.com)
+[Download linux bash compatible script](https://raw.githubusercontent.com/Karuch/aws-cli-setup-sophistication//main/linux/bash/cli-login.sh)  
+[Download windows powershell compatible script](https://raw.githubusercontent.com/Karuch/aws-cli-setup-sophistication//main/windows/powershell/cli-login.ps1)
 
  or
 
@@ -20,6 +20,55 @@ git clone git@github.com:mt-infra-devops/aws-sign-in-sophistication
 
 ## Usage
 
+### Linux bash script:
+
+```bash
+chmod +X cli-login.sh
+```
+
+Must be executed using `source`!
+```bash
+source ./cli-login.sh \
+  --aws-key <AccessKey> \
+  --aws-secret <SecretKey> \
+  --region <Region e.g il-central-1> \
+  --profile <IamUserName e.g talk> \
+  --role-name <roleName> \
+  --account-id <accountId e.g 012345678910>
+```
+then you'll be asked to prompt the IAM user's MFA code.  
+check you assumed the role successfully:
+```bash
+aws sts get-caller-identity
+```
+
+### Windows powershell script:
+
+must be executed via powershell terminal!  
+cmd might not work.
+```powershell
+powershell -ExecutionPolicy Bypass -File .\cli-login.ps1 `
+  -awsKey <AccessKey> `
+  -awsSecret <SecretKey> `
+  -region <Region e.g. il-central-1> `
+  -profile <IamUserName e.g. talk> `
+  -roleName <roleName> `
+```
+then you'll be asked to prompt the IAM user's MFA code.  
+
+if executed successfully a new profile should be created by the name of your IAM user  
+you should be able to see it there:
+```bash
+aws configure list-profiles
+```
+then switch to the newly created profile:
+```powershell
+$env:AWS_PROFILE = '<profile name>'
+```
+check that you assumed the role successfully:
+```bash
+aws sts get-caller-identity
+```
 
 
 ## Contributing
@@ -37,5 +86,5 @@ Distributed under the Apache License 2.0. See `LICENSE.txt` for more information
 ## Contact
 
 Email: talk474747@gmail.com  
-Linkedin: [https://www.linkedin.com/in/tal-karucci](https://www.linkedin.com/in/tal-karucci-678286290)  
-Project Link: [https://github.com/mt-infra-devops/aws-sign-in-sophistication](https://github.com/mt-infra-devops/aws-sign-in-sophistication)
+Linkedin: [www.linkedin.com/in/tal-karucci](https://www.linkedin.com/in/tal-karucci-678286290)  
+Project Link: [github.com/Karuch/aws-cli-setup-sophistication](https://github.com/Karuch/aws-cli-setup-sophistication)
