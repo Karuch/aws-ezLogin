@@ -1,4 +1,4 @@
-# aws-sign-in-sophistication
+# aws-cli-setup-sophistication
 
 aws-sign-in-sophistication is automation for the process of installing AWS CLI (v2),  
 create a profile for your IAM user (persistent cerdentials you are using to send API requests to AWS),  
